@@ -5,7 +5,10 @@ import ma.emsi.ebanking.Enum.OperationType;
 import ma.emsi.ebanking.Exceptions.BalanceInsufisantException;
 import ma.emsi.ebanking.Exceptions.BankAccountException;
 import ma.emsi.ebanking.Exceptions.CustomerNotFoundExceptions;
+import ma.emsi.ebanking.dtos.BankAccountDto;
+import ma.emsi.ebanking.dtos.CurrentBankAccountDto;
 import ma.emsi.ebanking.dtos.CustomerDto;
+import ma.emsi.ebanking.dtos.SavingBankAccountDto;
 import ma.emsi.ebanking.entities.*;
 import ma.emsi.ebanking.repositories.AccountOperationsRepos;
 import ma.emsi.ebanking.repositories.BankAccountRepos;
@@ -47,22 +50,27 @@ public class EBankingApplication {
             });
 
             //liste clients
-            b.listCustomer().forEach(customer -> {
+            b.listCustomers().forEach(customer -> {
 
                 try
                 {
-                    b.saveCurrentAccount(Math.random()*9000,
+                    b.saveCurrentBankAccount(Math.random()*9000,
                             9000,
                             customer.getID());
-                    b.saveSavingAccount(Math.random()*9000,
+                    b.saveSavingBankAccount(Math.random()*9000,
                             5.5,
                             customer.getID());
-                    List<BankAccount> liste=b.bankAccountList();
-                    for(BankAccount compte : liste)
-                    {
-                        for(int i=0;i<10;i++){
-                           b.credit(compte.getId(),10000+Math.random()*12000,"Credit");
-                           b.debit(compte.getId(),1000+Math.random()*9000,"DEBIT");
+                    List<BankAccountDto> liste=b.bankAccountList();
+                    for (BankAccountDto bankAccount:liste){
+                        for (int i = 0; i <10 ; i++) {
+                            String accountId;
+                            if(bankAccount instanceof SavingBankAccountDto){
+                                accountId=((SavingBankAccountDto) bankAccount).getId();
+                            } else{
+                                accountId=((CurrentBankAccountDto) bankAccount).getId();
+                            }
+                            b.credit(accountId,10000+Math.random()*120000,"Credit");
+                            b.debit(accountId,1000+Math.random()*9000,"Debit");
                         }
                     }
 
